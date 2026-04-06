@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: pockii_mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      # Cấu hình Mặc định cho DB
+      MYSQL_ROOT_PASSWORD: root_password_secure
+      MYSQL_DATABASE: pockii_db
+      MYSQL_USER: pockii_user
+      MYSQL_PASSWORD: pockii_password_123
+    volumes:
+      # Lưu trữ dữ liệu DB ở ngoài container để vĩnh viễn (khi xóa container ko bị mất data)
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
