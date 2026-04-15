@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pockii - Đăng ký</title>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <a href="Home.html" class="logo">Pockii</a>
+        
+        <div class="auth-alt">
+            <a href="login.html" class="auth-text">Bạn đã có tài khoản?</a>
+            <a href="login.html" class="btn btn-login-standalone">Đăng nhập</a>
+        </div>
+    </header>
+
+    <main class="signup-page">
+        <div class="signup-box">
+            <h1 class="signup-title">Chào mừng bạn đến với Pockii</h1>
+            
+            <div class="social-login">
+                <button class="btn-social"><img src="/google.png" alt="Google"></button>
+                <button class="btn-social"><img src="/facebook.png" alt="Facebook"></button>
+            </div>
+
+<form id="signup-form" action="#" class="signup-form" novalidate>
+                
+    <div class="input-group">
+        <label>Họ và tên:</label>
+        <input type="text" id="fullname" required>
+    </div>
+
+                <div class="input-group">
+                    <label>Email:</label>
+                    <input type="email" id="email" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Số điện thoại:</label>
+                    <input type="tel" id="phone" required>
+                    <span id="phone-error" class="error-message"></span> 
+                </div>
+
+                <div class="input-group">
+                    <label>Mật khẩu:</label>
+                    <input type="password" id="password" required>
+                    <span id="password-error" class="error-message"></span> 
+                </div>
+
+                <div class="input-group">
+                    <label>Xác nhận mật khẩu:</label>
+                    <input type="password" id="confirm-password" required>
+                    <span id="confirm-error" class="error-message"></span> 
+                </div>
+
+
+
+                <div class="form-actions">
+                    <a href="Home.html" type="submit" class="btn-submit">Đăng ký</a>
+                </div>
+                
+            </form>
+        </div>
+    </main>
+
+</body>
+</html>
