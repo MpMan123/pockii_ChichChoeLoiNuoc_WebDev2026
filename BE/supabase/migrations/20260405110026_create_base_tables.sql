@@ -17,15 +17,17 @@ CREATE TABLE LEVELS (
 );
 
 CREATE TABLE USERS (
-    UserID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    Username VARCHAR(50) NOT NULL,
+    UserID UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    Username VARCHAR(50),
     Email VARCHAR(100) NOT NULL,
-    PasswordHash VARCHAR(255) NOT NULL,
-    PhoneNumber VARCHAR(15) NOT NULL,
+    PhoneNumber VARCHAR(15),
     FullName VARCHAR(100),
     AvatarURL TEXT,
     LevelID INT,
     FOREIGN KEY (LevelID) REFERENCES LEVELS(LevelID),
+
+    LastSignInAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    LastSignOutAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -41,7 +43,7 @@ CREATE TABLE RECURRING_EXPENSES (
     StartDate DATE,
     EndDate DATE,
     
-    UserID INT NOT NULL,
+    UserID UUID NOT NULL,
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
@@ -92,7 +94,7 @@ CREATE TABLE ATTEMPTS (
     CompletedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     ArticleID INT NOT NULL,
-    UserID INT NOT NULL,
+    UserID UUID NOT NULL,
     FOREIGN KEY (ArticleID) REFERENCES ARTICLES(ArticleID) ON DELETE CASCADE,
     FOREIGN KEY (UserID) REFERENCES USERS(UserID) ON DELETE CASCADE,
 
@@ -120,7 +122,7 @@ CREATE TABLE CHALLENGE_HISTORIES (
     -- Nếu nhiệm vụ là làm Quiz, trỏ về attempt_id
     AttemptID INT,
     ChallengeID INT,
-    UserID INT NOT NULL,
+    UserID UUID NOT NULL,
     
     FOREIGN KEY (AttemptID) REFERENCES ATTEMPTS(AttemptID) ON DELETE SET NULL,
     FOREIGN KEY (ChallengeID) REFERENCES DAILY_CHALLENGES(ChallengeID) ON DELETE SET NULL,
@@ -132,14 +134,12 @@ CREATE TABLE BILLS (
     BillName VARCHAR(255),
     Amount NUMERIC(15, 2) NOT NULL,
     DueDate DATE NOT NULL,
-    FlatInterestRate NUMERIC(6, 4),
-    EffectiveInterestRate NUMERIC(6, 4),
     Priority PRIORITY_LEVEL DEFAULT 'Medium',
     IsPaid BOOLEAN DEFAULT FALSE,
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    UserID INT NOT NULL,
+    UserID UUID NOT NULL,
     FOREIGN KEY (UserID) REFERENCES USERS(UserID) ON DELETE CASCADE
 );
 
@@ -148,6 +148,7 @@ CREATE TABLE SAVING_PLANS (
     PlanName VARCHAR(100) NOT NULL,
     CurrentTargetAmount DECIMAL(10, 2) NOT NULL,
     FinalTargetAmount DECIMAL(10, 2) DEFAULT 0,
+    InterestRate NUMERIC(6, 4), -- Lãi suất mỗi năm (nếu có)
     StartDate DATE NOT NULL,
     EndDate DATE NOT NULL,
     Priority PRIORITY_LEVEL DEFAULT 'Medium',
@@ -155,7 +156,7 @@ CREATE TABLE SAVING_PLANS (
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
-    UserID INT NOT NULL,
+    UserID UUID NOT NULL,
     FOREIGN KEY (UserID) REFERENCES USERS(UserID) ON DELETE CASCADE
 );
 
@@ -169,7 +170,7 @@ CREATE TABLE ACCOUNTS (
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
-    UserID INT NOT NULL,
+    UserID UUID NOT NULL,
     FOREIGN KEY (UserID) REFERENCES USERS(UserID) ON DELETE CASCADE
 );
 
@@ -201,8 +202,9 @@ CREATE TABLE TRANSACTIONS (
     RecordedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     VerificationMethod VERIFICATION_METHOD NOT NULL,
     Priority PRIORITY_LEVEL DEFAULT 'Medium',
+    ProofImageUrl TEXT, -- Lưu trữ link ảnh biên lai/hóa đơn từ Supabase Storage
     
-    UserID INT NOT NULL,
+    UserID UUID NOT NULL,
     AccountID INT NOT NULL,
     FOREIGN KEY (UserID) REFERENCES USERS(UserID) ON DELETE CASCADE,
     FOREIGN KEY (AccountID) REFERENCES ACCOUNTS(AccountID) ON DELETE CASCADE
@@ -229,7 +231,8 @@ CREATE TABLE DEBTS (
     DebtName VARCHAR(255) NOT NULL,
     InitialPrincipal NUMERIC(15, 2) NOT NULL,
     CurrentBalance NUMERIC(15, 2) NOT NULL,
-    EffectiveInterestRate NUMERIC(6, 4) NOT NULL, 
+    FlatInterestRate NUMERIC(6, 4) NOT NULL, -- Sinh ra do Frontend nhập
+    EffectiveInterestRate NUMERIC(6, 4),     -- Có thể tính toán tự động
     
     EstimatedMaturityDate DATE,
 
@@ -237,7 +240,7 @@ CREATE TABLE DEBTS (
     UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     EndDate DATE NOT NULL,
 
-    UserID INT NOT NULL,
+    UserID UUID NOT NULL,
     StrategyID INT NOT NULL,
     FOREIGN KEY (UserID) REFERENCES USERS(UserID) ON DELETE CASCADE,
     FOREIGN KEY (StrategyID) REFERENCES REPAYMENT_STRATEGIES(StrategyID) ON DELETE CASCADE
@@ -281,7 +284,7 @@ CREATE TABLE GET_REWARDS (
     
     SponsorID INT NOT NULL,
     RewardID INT NOT NULL,
-    UserID INT NOT NULL,
+    UserID UUID NOT NULL,
     FOREIGN KEY (RewardID) REFERENCES REWARDS(RewardID) ON DELETE CASCADE,
     FOREIGN KEY (UserID) REFERENCES USERS(UserID) ON DELETE CASCADE,
     FOREIGN KEY (SponsorID) REFERENCES SPONSORS(SponsorID) ON DELETE CASCADE,
@@ -295,7 +298,7 @@ CREATE TABLE PARTICIPATE_CHALLENGES (
     IsSolved BOOLEAN DEFAULT FALSE,
     
     AttemptID INT NOT NULL,
-    UserID INT NOT NULL,
+    UserID UUID NOT NULL,
     FOREIGN KEY (AttemptID) REFERENCES ATTEMPTS(AttemptID) ON DELETE CASCADE,
     FOREIGN KEY (UserID) REFERENCES USERS(UserID) ON DELETE CASCADE,
     
@@ -347,9 +350,8 @@ ALTER TABLE PARTICIPATE_CHALLENGES ENABLE ROW LEVEL SECURITY;
 
 -- ==========================================
 -- RLS POLICIES
--- Lưu ý quan trọng: Vì cột UserID của bạn là INTEGER, nhưng Supabase mặc định dùng UUID.
--- Policy dưới đây được viết theo thiết kế "Custom JWT", giả định rằng Backend Express của bạn sẽ 
--- tạo token và nhúng ID tự tăng của user vào trường `custom_user_id`.
+-- Đã cập nhật UserID đồng bộ với UUID của auth.users
+-- Sử dụng auth.uid() tự nhiên của Supabase
 -- ==========================================
 
 -- 1. Bảng Công Cộng (Mọi Client có thể SELECT, không được Insert/Update ngoại trừ BE gọi bằng Service Key)
@@ -361,19 +363,21 @@ CREATE POLICY "Public Read Only for Sponsors" ON SPONSORS FOR SELECT USING (true
 CREATE POLICY "Public Read Only for Rewards" ON REWARDS FOR SELECT USING (true);
 
 -- 2. Bảng Dữ Liệu Cá nhân (User nào thì chỉ được thao tác trên dòng của User đó)
-CREATE POLICY "Isolate Users Data" ON USERS FOR ALL USING ( NULLIF(auth.jwt()->>'custom_user_id', '')::INT = UserID );
-CREATE POLICY "Isolate Recurring Expenses Data" ON RECURRING_EXPENSES FOR ALL USING ( NULLIF(auth.jwt()->>'custom_user_id', '')::INT = UserID );
-CREATE POLICY "Isolate Attempts Data" ON ATTEMPTS FOR ALL USING ( NULLIF(auth.jwt()->>'custom_user_id', '')::INT = UserID );
-CREATE POLICY "Isolate Challenge Histories Data" ON CHALLENGE_HISTORIES FOR ALL USING ( NULLIF(auth.jwt()->>'custom_user_id', '')::INT = UserID );
-CREATE POLICY "Isolate Bills Data" ON BILLS FOR ALL USING ( NULLIF(auth.jwt()->>'custom_user_id', '')::INT = UserID );
-CREATE POLICY "Isolate Saving Plans Data" ON SAVING_PLANS FOR ALL USING ( NULLIF(auth.jwt()->>'custom_user_id', '')::INT = UserID );
-CREATE POLICY "Isolate Accounts Data" ON ACCOUNTS FOR ALL USING ( NULLIF(auth.jwt()->>'custom_user_id', '')::INT = UserID );
-CREATE POLICY "Isolate Transactions Data" ON TRANSACTIONS FOR ALL USING ( NULLIF(auth.jwt()->>'custom_user_id', '')::INT = UserID );
-CREATE POLICY "Isolate Debts Data" ON DEBTS FOR ALL USING ( NULLIF(auth.jwt()->>'custom_user_id', '')::INT = UserID );
-CREATE POLICY "Isolate Get Rewards Data" ON GET_REWARDS FOR ALL USING ( NULLIF(auth.jwt()->>'custom_user_id', '')::INT = UserID );
-CREATE POLICY "Isolate Participate Challenges Data" ON PARTICIPATE_CHALLENGES FOR ALL USING ( NULLIF(auth.jwt()->>'custom_user_id', '')::INT = UserID );
+CREATE POLICY "Isolate Users Data" ON USERS FOR ALL USING ( auth.uid() = UserID );
+CREATE POLICY "Isolate Recurring Expenses Data" ON RECURRING_EXPENSES FOR ALL USING ( auth.uid() = UserID );
+CREATE POLICY "Isolate Attempts Data" ON ATTEMPTS FOR ALL USING ( auth.uid() = UserID );
+CREATE POLICY "Isolate Challenge Histories Data" ON CHALLENGE_HISTORIES FOR ALL USING ( auth.uid() = UserID );
+CREATE POLICY "Isolate Bills Data" ON BILLS FOR ALL USING ( auth.uid() = UserID );
+CREATE POLICY "Isolate Saving Plans Data" ON SAVING_PLANS FOR ALL USING ( auth.uid() = UserID );
+CREATE POLICY "Isolate Accounts Data" ON ACCOUNTS FOR ALL USING ( auth.uid() = UserID );
+CREATE POLICY "Isolate Transactions Data" ON TRANSACTIONS FOR ALL USING ( auth.uid() = UserID );
+CREATE POLICY "Isolate Debts Data" ON DEBTS FOR ALL USING ( auth.uid() = UserID );
+CREATE POLICY "Isolate Get Rewards Data" ON GET_REWARDS FOR ALL USING ( auth.uid() = UserID );
+CREATE POLICY "Isolate Participate Challenges Data" ON PARTICIPATE_CHALLENGES FOR ALL USING ( auth.uid() = UserID );
 
 -- 3. Đặc biệt: Quyền truy cập các bảng rẽ nhánh
 CREATE POLICY "Isolate Withdrawals" ON WITHDRAW_FROM FOR ALL USING (
-    EXISTS (SELECT 1 FROM SAVING_PLANS WHERE SAVING_PLANS.SavingPlanID = WITHDRAW_FROM.SavingPlanID AND NULLIF(auth.jwt()->>'custom_user_id', '')::INT = SAVING_PLANS.UserID)
+    EXISTS (SELECT 1 FROM SAVING_PLANS WHERE SAVING_PLANS.SavingPlanID = WITHDRAW_FROM.SavingPlanID AND auth.uid() = SAVING_PLANS.UserID)
 );
+
+-- ==========================================
