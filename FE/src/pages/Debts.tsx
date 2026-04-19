@@ -2,16 +2,6 @@ import { Home, Zap, CreditCard, ChevronRight } from 'lucide-react';
 import { Button, Input, Select, DatePicker, InputNumber, Form } from 'antd';
 import { createDebt } from '../services/debt.service';
 
-interface DebtFormValues {
-  debtName: string;
-  initialPrincipal: number;
-  flatInterestRate: number;
-  currency: string | 'VND';
-  priority: string | 'Medium';
-  dueDate: any;
-  isPaid: boolean | false;
-}
-
 const Debts = () => {
   const [form] = Form.useForm();
   const handleCreateDebt = async () => {

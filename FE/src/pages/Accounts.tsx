@@ -1,17 +1,17 @@
-import React from 'react';
+// import React from 'react';
 import { Button } from 'antd';
-import { 
-  Plus, 
-  RefreshCcw, 
-  Star, 
-  Landmark, 
-  User, 
-  Pencil, 
-  MoreVertical, 
-  PiggyBank, 
-  Wallet, 
-  TrendingUp, 
-  Settings 
+import {
+  Plus,
+  RefreshCcw,
+  Star,
+  Landmark,
+  User,
+  Pencil,
+  MoreVertical,
+  PiggyBank,
+  Wallet,
+  TrendingUp,
+  Settings
 } from 'lucide-react';
 
 const Accounts = () => {
@@ -24,13 +24,13 @@ const Accounts = () => {
           <p className="text-sm font-medium text-text-muted">Tổ chức tài chính của bạn một cách thanh thản.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button 
+          <Button
             className="flex items-center gap-2 h-11 px-5 rounded-xl border-none bg-accent-gold/20 text-accent-gold hover:!bg-accent-gold/30 hover:!text-accent-gold-dark font-semibold text-sm transition-all"
           >
             <RefreshCcw size={16} />
             Kết nối ngân hàng
           </Button>
-          <Button 
+          <Button
             className="flex items-center gap-2 h-11 px-5 rounded-xl border-none bg-primary text-white hover:!bg-primary-dark hover:!text-white font-semibold text-sm shadow-sm transition-transform hover:-translate-y-0.5"
           >
             <Plus size={18} />
@@ -41,12 +41,12 @@ const Accounts = () => {
 
       {/* Cards Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Main Account Card */}
         <div className="lg:col-span-2 relative bg-[#4a856a] rounded-[2rem] p-8 text-white shadow-xl overflow-hidden min-h-[220px] flex flex-col justify-between group">
           {/* Faded Background Icon */}
           <Landmark size={140} className="absolute -right-6 -bottom-6 opacity-20 text-white transform -rotate-12 transition-transform duration-500 group-hover:rotate-0" />
-          
+
           <div className="relative z-10 flex justify-between items-start">
             <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase">
               <Star size={12} className="fill-white" />
@@ -170,7 +170,7 @@ const Accounts = () => {
                 <p className="text-xs text-text-muted font-medium mt-0.5">Kết nối lần cuối: Hôm nay, 08:30</p>
               </div>
             </div>
-            
+
             <div className="flex justify-between sm:justify-end items-center gap-6 sm:gap-10 sm:min-w-[350px]">
               <div className="text-left sm:text-right">
                 <p className="font-bold text-text text-[15px]">**** 8890</p>
@@ -193,14 +193,14 @@ const Accounts = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white hover:bg-black/[0.01] rounded-2xl transition-colors border border-transparent hover:border-black/5 gap-4">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-[#E51B24] shadow-sm flex items-center justify-center overflow-hidden shrink-0">
-                 <span className="text-white font-bold text-xl italic font-sans">T</span>
+                <span className="text-white font-bold text-xl italic font-sans">T</span>
               </div>
               <div>
                 <h4 className="font-bold text-text text-base">Techcombank</h4>
                 <p className="text-xs text-text-muted font-medium mt-0.5">Kết nối lần cuối: Hôm qua, 14:15</p>
               </div>
             </div>
-            
+
             <div className="flex justify-between sm:justify-end items-center gap-6 sm:gap-10 sm:min-w-[350px]">
               <div className="text-left sm:text-right">
                 <p className="font-bold text-text text-[15px]">**** 1234</p>

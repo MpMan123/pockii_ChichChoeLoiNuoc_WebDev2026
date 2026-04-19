@@ -1,18 +1,16 @@
 import { BookOpen, Search, ArrowRight, PlayCircle, Clock } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { Input, Button } from 'antd';
 
 const Scholar = () => {
-  const navigate = useNavigate();
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
       <div className="glass bg-white p-6 rounded-3xl mt-4">
         <div className="relative mb-8">
-          <Input 
+          <Input
             size="large"
-            prefix={<Search size={20} className="text-text-muted mr-2" />} 
-            className="w-full py-4 bg-[#F8FAFC] border-none rounded-2xl outline-none font-medium text-[15px] focus:ring-4 focus:ring-primary/10 transition-all hover:bg-black/5" 
-            placeholder="Search topics (e.g. 'compound interest', 'taxes')" 
+            prefix={<Search size={20} className="text-text-muted mr-2" />}
+            className="w-full py-4 bg-[#F8FAFC] border-none rounded-2xl outline-none font-medium text-[15px] focus:ring-4 focus:ring-primary/10 transition-all hover:bg-black/5"
+            placeholder="Search topics (e.g. 'compound interest', 'taxes')"
           />
         </div>
 

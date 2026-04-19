@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CreditCard, TrendingUp, Search, Filter } from 'lucide-react';
+import { TrendingUp, Search, Filter } from 'lucide-react';
 import { Button, Table, Alert } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { fetchAllTransaction } from '../services/transaction.service';
@@ -48,6 +48,7 @@ const Dashboard = () => {
       try {
         const response = await fetchBills({ isPaid: false, inOrder: true });
         setBills(response.data);
+        console.log("BILLS", bills);
       } catch (err: any) {
         console.error("Failed to fetch bills:", err);
       }
