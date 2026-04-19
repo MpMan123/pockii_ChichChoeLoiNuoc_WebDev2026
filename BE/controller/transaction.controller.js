@@ -2,10 +2,13 @@ import supabase from "../config/supabase.js";
 
 export const getAllTransactions = async (req, res) => {
     try {
-        const { data, error } = await supabase
+        const query = supabase
             .from('transactions')
-            .eq('user_id', req.user.id)
-            .select(`*`);
+            .select('*')
+            .eq('userid', req.user.id);
+        console.log("TRANSACTION", query);
+        const { data, error } = await query;
+        if (error) console.error('error', error);
         res.status(200).json({
             status: "success",
             data: data

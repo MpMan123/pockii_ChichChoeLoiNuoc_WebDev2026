@@ -1,4 +1,3 @@
-import supabase from '../config/database.js';
 import Bill from '../model/bill.model.js';
 
 export const getAllBills = async (req, res) => {
@@ -11,8 +10,8 @@ export const getAllBills = async (req, res) => {
             inOrder: req.query.inOrder,
         }
 
-        const data = await Bill.findAll(filter);
-
+        const { data, error } = await Bill.findAll(filter);
+        if (error) console.error('error', error);
         res.status(200).json({
             status: "success",
             data: data
@@ -23,7 +22,7 @@ export const getAllBills = async (req, res) => {
     }
 }
 
-export const getBillById = async (res, req) => {
+export const getBillById = async (req, res) => {
     try {
         const userId = req.user.id;
         const billId = req.params.id;

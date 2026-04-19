@@ -12,6 +12,8 @@ import authRouter from './routes/auth.routes.js';
 import debtRouter from './routes/debt.routes.js';
 import transactionRouter from './routes/transaction.routes.js';
 import userRouter from './routes/user.routes.js';
+import accountRouter from './routes/account.routes.js';
+import billRouter from './routes/bill.routes.js';
 
 // Middleware
 // import errorMiddleware from './middleware/error.middleware.js';
@@ -36,6 +38,8 @@ app.use('/api/auth', authRouter);
 app.use('/api/debt', debtRouter);
 app.use('/api/transaction', transactionRouter);
 app.use('/api/user', userRouter);
+app.use('/api/account', accountRouter);
+app.use('/api/bill', billRouter);
 
 // Root endpoint
 app.get('/', (req, res, next) => {
@@ -49,7 +53,8 @@ app.get('/', (req, res, next) => {
             budget: '/api/budget',
             debt: '/api/debt',
             transaction: '/api/transaction',
-            user: '/api/user'
+            user: '/api/user',
+            account: '/api/account'
         }
     })
 });

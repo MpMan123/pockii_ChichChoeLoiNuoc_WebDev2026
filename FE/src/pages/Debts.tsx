@@ -1,7 +1,40 @@
 import { Home, Zap, CreditCard, ChevronRight } from 'lucide-react';
-import { Button, Input, Select, DatePicker, InputNumber } from 'antd';
+import { Button, Input, Select, DatePicker, InputNumber, Form } from 'antd';
+import { createDebt } from '../services/debt.service';
+
+interface DebtFormValues {
+  debtName: string;
+  initialPrincipal: number;
+  flatInterestRate: number;
+  currency: string | 'VND';
+  priority: string | 'Medium';
+  dueDate: any;
+  isPaid: boolean | false;
+}
 
 const Debts = () => {
+  const [form] = Form.useForm();
+  const handleCreateDebt = async () => {
+    try {
+      const values = await form.validateFields();
+
+      const payload = {
+        debtname: values.debtName,
+        initialprincipal: values.initialPrincipal,
+        flatinterestrate: values.interestRate,
+        currentbalance: values.initialPrincipal,
+        effectiveinterestrate: values.interestRate,
+        currency: values.currency,
+        priority: values.priority,
+        enddate: values.dueDate.format('YYYY-MM-DD'),
+      }
+
+      await createDebt(payload);
+    } catch (error) {
+      console.error(error);
+    }
+
+  }
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -46,8 +79,8 @@ const Debts = () => {
                     <h4 className="text-lg font-bold text-text">{debt.amount}</h4>
                     <span className={`badge ${debt.priority === 'High Priority' ? 'badge-warning' : ''}`}>{debt.priority}</span>
                   </div>
-                  <Button 
-                    type={debt.btn as "primary" | "default"} 
+                  <Button
+                    type={debt.btn as "primary" | "default"}
                     className={`mt-4 sm:mt-0 font-semibold w-full sm:w-auto h-10 px-6 rounded-xl ${debt.btn === 'primary' ? 'bg-primary hover:!bg-primary-dark border-none shadow-sm' : 'border-[#E2E8F0] hover:!border-primary hover:!text-primary'}`}
                   >
                     Pay Now
@@ -71,72 +104,124 @@ const Debts = () => {
         </div>
 
         <div>
-          <div className="glass bg-white p-6 sm:p-8 rounded-3xl sticky top-8">
-            <h3 className="mb-6 text-xl font-heading text-primary-dark">Add New Debt</h3>
-
-            <div className="mb-5 flex flex-col gap-2">
-              <label className="text-xs font-semibold text-text-muted uppercase tracking-wide">DEBT LABEL</label>
-              <Input 
-                size="large"
-                className="bg-black/5 hover:bg-white focus:bg-white border-[#E2E8F0] rounded-xl text-sm transition-all" 
-                placeholder="e.g. Student Loan" 
-              />
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 mb-5">
-              <div className="flex-1 flex flex-col gap-2">
-                <label className="text-xs font-semibold text-text-muted uppercase tracking-wide">AMOUNT</label>
-                <InputNumber 
-                  size="large"
-                  prefix="$"
-                  className="w-full bg-black/5 hover:bg-white focus:bg-white border-[#E2E8F0] rounded-xl text-sm transition-all" 
-                  placeholder="0.00" 
-                />
-              </div>
-              <div className="flex-1 flex flex-col gap-2">
-                <label className="text-xs font-semibold text-text-muted uppercase tracking-wide">INTEREST %</label>
-                 <InputNumber 
-                  size="large"
-                  suffix="%"
-                  className="w-full bg-black/5 hover:bg-white focus:bg-white border-[#E2E8F0] rounded-xl text-sm transition-all" 
-                  placeholder="0.0" 
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 mb-5">
-              <div className="flex-1 flex flex-col gap-2">
-                <label className="text-xs font-semibold text-text-muted uppercase tracking-wide">DUE DATE</label>
-                <DatePicker 
-                  size="large"
-                  className="w-full bg-black/5 hover:bg-white focus:bg-white border-[#E2E8F0] rounded-xl text-sm transition-all" 
-                />
-              </div>
-              <div className="flex-1 flex flex-col gap-2">
-                <label className="text-xs font-semibold text-text-muted uppercase tracking-wide">PRIORITY</label>
-                <Select 
-                  size="large"
-                  defaultValue="Standard"
-                  options={[
-                    { value: 'Standard', label: 'Standard' },
-                    { value: 'High', label: 'High Priority' }
-                  ]}
-                  className="w-full"
-                  popupClassName="rounded-xl"
-                />
-              </div>
-            </div>
-
-            <Button 
-                type="primary" 
-                className="w-full h-12 mt-4 text-[15px] font-bold rounded-xl bg-primary hover:!bg-primary-dark border-none shadow-sm transition-transform hover:-translate-y-px"
+          <div className="bg-form-bg p-2 sm:p-6 rounded-3xl sticky top-8">
+            <h3 className="mb-6 text-xl font-bold font-heading text-primary-dark">Add New Debt</h3>
+            <Form
+              form={form}
+              layout='vertical'
+              onFinish={handleCreateDebt}
+              initialValues={{ priority: 'Medium' }}
             >
+              <div className="mb-5 flex flex-col gap-1">
+                <label className="text-xs font-bold text-text-muted uppercase tracking-wide">DEBT LABEL</label>
+
+                <Form.Item
+                  className='!mb-1'
+                  name="debtName"
+                  rules={[
+                    { required: true, message: 'Please enter debt name' },
+                    { min: 3, message: 'Debt name must be at least 3 characters' },
+                    { max: 50, message: 'Debt name must be at most 50 characters' },
+                  ]}
+                >
+                  <Input
+                    size="large"
+                    className="bg-black/5 hover:bg-white focus:bg-white border-[#E2E8F0] rounded-xl text-sm transition-all"
+                    placeholder="e.g. Student Loan"
+                  />
+                </Form.Item>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4 !mb-1">
+                <div className="flex-1 flex flex-col gap-2">
+                  <label className="text-xs font-bold text-text-muted uppercase tracking-wide">INITIAL PRINCIPAL</label>
+                  <Form.Item
+                    className="mb-1"
+                    name="initialPrincipal"
+                    rules={[
+                      { required: true, message: 'Please enter initial principal' },
+                      { type: 'number', min: 0, message: 'Initial principal must be at least 0' },
+                    ]}
+                  >
+                    <InputNumber
+                      size="large"
+                      prefix="$"
+                      className="bg-black/5 hover:bg-white focus:bg-white border-[#E2E8F0] rounded-xl text-sm transition-all"
+                      placeholder="0.00"
+                    />
+                  </Form.Item>
+                </div>
+                <div className="flex-1 flex flex-col gap-2">
+                  <label className="text-xs font-bold text-text-muted uppercase tracking-wide">INTEREST RATE</label>
+                  <Form.Item
+                    className="!mb-1"
+                    name="interestRate"
+                    rules={[
+                      { required: true, message: 'Please enter interest rate' },
+                      { type: 'number', min: 0, message: 'Interest rate must be at least 0' },
+                    ]}
+                  >
+                    <InputNumber
+                      size="large"
+                      prefix="$"
+                      className="bg-black/5 hover:bg-white focus:bg-white border-[#E2E8F0] rounded-xl text-sm transition-all"
+                      placeholder="0.00"
+                    />
+                  </Form.Item>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4 !mb-1" >
+                <div className="flex-1 flex flex-col gap-2">
+                  <label className="text-xs font-bold text-text-muted uppercase tracking-wide">DUE DATE</label>
+                  <Form.Item
+                    className="!mb-1"
+                    name="dueDate"
+                    rules={[
+                      { required: true, message: 'Please select due date' },
+                    ]}
+                  >
+                    <DatePicker
+                      size="large"
+                      className="w-full bg-black/5 hover:bg-white focus:bg-white border-[#E2E8F0] rounded-xl text-sm transition-all"
+                    />
+                  </Form.Item>
+                </div>
+                <div className="flex-1 flex flex-col gap-2">
+                  <label className="text-xs font-bold text-text-muted uppercase tracking-wide">PRIORITY</label>
+                  <Form.Item
+                    name="priority"
+                    rules={[
+                      { required: true, message: 'Please select priority' },
+                    ]}
+                  >
+                    <Select
+                      size="large"
+                      options={[
+                        { value: 'Low', label: 'Low' },
+                        { value: 'Medium', label: 'Medium' },
+                        { value: 'High', label: 'High' },
+                        { value: 'Critical', label: 'Critical' }
+                      ]}
+                      className="w-full"
+                      rootClassName="rounded-xl"
+                    />
+                  </Form.Item>
+                </div>
+              </div>
+
+              <Button
+                type="primary"
+                className="w-full !h-13 mt-4 text-[15px] !font-bold !text-text-button font-bold !rounded-full !bg-[#FFC896] hover:!bg-primary-dark border-none shadow-sm transition-transform hover:-translate-y-px"
+                onClick={handleCreateDebt}
+              >
                 Record Debt
-            </Button>
+              </Button>
+
+
+            </Form>
           </div>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 

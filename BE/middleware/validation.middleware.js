@@ -2,7 +2,6 @@ export const validateRequest = (schema) => {
     return (req, res, next) => {
         // Dùng safeParse để kiểm tra mà không bị bung lỗi sập server (throw error)
         const result = schema.safeParse(req.body);
-
         if (!result.success) {
             // Lọc ra danh sách các lỗi dễ đọc cho Frontend
             const errors = result.error.errors.map(err => ({

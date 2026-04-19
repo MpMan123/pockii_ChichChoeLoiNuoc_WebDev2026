@@ -18,8 +18,9 @@ class Bill {
             }
 
             if (isPaid !== undefined) { // So sánh !== undefined vì isPaid có thể là boolean (false)
-                query = query.eq('isPaid', isPaid);
+                query = query.eq('ispaid', isPaid);
             }
+            else query = query.eq('ispaid', false);
 
             if (inOrder !== undefined) {
                 if (inOrder === 'true') {

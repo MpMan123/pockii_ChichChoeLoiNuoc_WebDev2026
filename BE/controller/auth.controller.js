@@ -19,7 +19,7 @@ export const login = async (req, res) => {
         })
 
         if (error) {
-           return res.status(401).json({ success: false, message: error.message });
+            return res.status(401).json({ success: false, message: error.message });
         }
 
         // Set HttpOnly cookie for the access token to prevent XSS
@@ -33,7 +33,7 @@ export const login = async (req, res) => {
         // Don't leak session token directly to frontend body anymore, just user data
         res.status(200).json({
             success: true,
-            data: { user: data.user },
+            data: { user: data.user, fullName: data.user?.user_metadata?.name || '', phoneNumber: data.user?.user_metadata?.phone || '' },
             message: "Đăng nhập thành công"
         })
     } catch (error) {
@@ -66,14 +66,21 @@ export const logout = async (req, res) => {
 
 export const register = async (req, res) => {
     try {
-        const userData = req.body;
+        const { email, password, fullName, phoneNumber } = req.body;
 
         // Valid inputs
-        if (!userData.email || !userData.password) {
+        if (!email || !password || !fullName || !phoneNumber) {
             return res.status(400).json({
                 success: false,
-                message: "Vui lòng nhập đầy đủ email và mật khẩu!",
+                message: "Vui lòng nhập đầy đủ email, mật khẩu, họ tên và số điện thoại!",
             })
+        }
+
+        const userData = {
+            email,
+            password,
+            fullName,
+            phoneNumber,
         }
 
         const data = await User.createUser(userData);

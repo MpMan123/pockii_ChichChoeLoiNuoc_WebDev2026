@@ -35,3 +35,14 @@ export const BillSchema = z.object({
 export const PayBillSchema = z.object({
     accountId: z.number({ required_error: "Vui lòng chọn tài khoản để thanh toán" }).positive(),
 });
+
+export const DebtSchema = z.object({
+    debtname: z.string(),
+    initialprincipal: z.number().positive(),
+    flatinterestrate: z.number(),
+    currentbalance: z.number(),
+    effectiveinterestrate: z.number(),
+    enddate: z.string().transform((val) => new Date(val)),
+    priority: z.enum(['Low', 'Medium', 'High', 'Critical']).default('Medium'),
+    strategyid: z.number().optional().default(1),
+});

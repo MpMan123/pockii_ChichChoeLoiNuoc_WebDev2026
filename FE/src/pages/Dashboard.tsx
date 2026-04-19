@@ -1,6 +1,10 @@
+import { useState, useEffect } from 'react';
 import { CreditCard, TrendingUp, Search, Filter } from 'lucide-react';
-import { Button, Table } from 'antd';
+import { Button, Table, Alert } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { fetchAllTransaction } from '../services/transaction.service';
+import { fetchPortfolio } from '../services/account.service.ts';
+import { fetchBills } from '../services/bill.service.ts';
 
 interface Transaction {
   key: string;
@@ -15,9 +19,68 @@ import { useAuth } from '../context/AuthContext';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  console.log(user);
+  const [data, setData] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [portfolio, setPortfolio] = useState(0);
+  const [bills, setBills] = useState([]);
 
-  const columns: ColumnsType<Transaction> = [
+  const formatCurrency = (amount: number | null) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(amount || 0);
+  };
+
+
+
+  useEffect(() => {
+    const loadPortfolio = async () => {
+      try {
+        const response = await fetchPortfolio();
+        setPortfolio(response.data.data);
+        console.log("PORTFOLIO", response.data.data)
+      } catch (err: any) {
+        console.error("Failed to fetch portfolio:", err);
+      }
+    };
+    const loadBills = async () => {
+      try {
+        const response = await fetchBills({ isPaid: false, inOrder: true });
+        setBills(response.data);
+      } catch (err: any) {
+        console.error("Failed to fetch bills:", err);
+      }
+    };
+    const loadTransactions = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetchAllTransaction();
+        if (response?.data) {
+          const formattedData = response.data.map((item: any) => ({
+            key: item.id || Math.random().toString(),
+            title: item.transactiondescription || item.transactioncategory || 'Transaction',
+            cat: item.transactioncategory || 'Other',
+            date: new Date(item.createdat || Date.now()).toLocaleDateString(),
+            amount: `${item.actualamount > 0 ? '+' : ''}${item.actualamount || 0} ${item.currency}`,
+            type: item.transactiontype === 'expense' ? 'expense' : 'income'
+          }));
+          setData(formattedData);
+        }
+      } catch (err: any) {
+        console.error("Failed to fetch transactions:", err);
+        setError(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (user) {
+      loadTransactions();
+      loadPortfolio();
+      loadBills();
+    }
+  }, [user]); const columns: ColumnsType<Transaction> = [
     {
       title: 'TRANSACTION',
       dataIndex: 'title',
@@ -51,13 +114,8 @@ const Dashboard = () => {
     },
   ];
 
-  const dataSource: Transaction[] = [
-    { key: '1', title: "Whole Foods Market", cat: "Groceries", date: "Oct 24, 2026", amount: "-$142.50", type: 'expense' },
-    { key: '2', title: "TechCorp Salary", cat: "Income", date: "Oct 22, 2026", amount: "+$4,200.00", type: 'income' },
-    { key: '3', title: "Netflix Subscription", cat: "Entertainment", date: "Oct 21, 2026", amount: "-$15.99", type: 'expense' },
-    { key: '4', title: "Uber Rides", cat: "Transport", date: "Oct 20, 2026", amount: "-$24.00", type: 'expense' },
-  ];
-
+  // Data is fetched from API, so this placeholder is no longer needed
+  // const dataSource: Transaction[] = [...]
   return (
     <div className="flex flex-col gap-8 animate-fade-in">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -68,7 +126,7 @@ const Dashboard = () => {
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
             <div className="relative z-10">
               <span className="text-xs font-semibold tracking-wider text-white/80 uppercase">Current Portfolio</span>
-              <h1 className="text-5xl font-heading mt-2 font-medium tracking-tight">$42,850.00</h1>
+              <h1 className="text-5xl font-heading mt-2 font-medium tracking-tight">{formatCurrency(portfolio)}</h1>
 
               <div className="flex items-center gap-2 mt-6">
                 <div className="flex items-center gap-1 text-xs font-bold bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
@@ -89,13 +147,17 @@ const Dashboard = () => {
             </div>
 
             <div className="overflow-x-auto">
-              {/* Thay thế Table HTML gốc bàng Ant Design Table */}
-              <Table
-                columns={columns}
-                dataSource={dataSource}
-                pagination={false}
-                rowKey="key"
-              />
+              {error ? (
+                <Alert type="error" message="Failed to load transactions" description={error.message || "Something went wrong"} className="mb-4" />
+              ) : (
+                <Table
+                  columns={columns}
+                  dataSource={data}
+                  pagination={{ pageSize: 5 }}
+                  rowKey="key"
+                  loading={isLoading}
+                />
+              )}
             </div>
           </div>
 
@@ -109,24 +171,20 @@ const Dashboard = () => {
               <Button type="link" className="!p-0 text-primary hover:underline font-semibold font-sans">View All</Button>
             </div>
 
-            <div className="flex flex-col gap-4">
-              {[
-                { name: "Rent Payment", due: "Due in 3 days", amount: "$2,400.00", icon: <CreditCard size={18} className="text-primary" />, bg: 'bg-primary/10' },
-                { name: "Car Insurance", due: "Due in 5 days", amount: "$185.00", icon: <CreditCard size={18} className="text-warning" />, bg: 'bg-warning/10' },
-                { name: "Gym Membership", due: "Due in 12 days", amount: "$65.00", icon: <CreditCard size={18} className="text-text-muted" />, bg: 'bg-black/5' },
-              ].map((bill, i) => (
+            {/* <div className="flex flex-col gap-4">
+              {bills.map((bill, i) => (
                 <div key={i} className="flex items-center gap-4 p-4 rounded-xl border border-black/5 hover:shadow-sm transition-all hover:-translate-y-0.5 cursor-pointer">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${bill.bg}`}>
                     {bill.icon}
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-sm text-text">{bill.name}</h4>
-                    <p className="text-xs text-text-muted mt-0.5">{bill.due}</p>
+                    <h4 className="font-semibold text-sm text-text">{bill.billname}</h4>
+                    <p className="text-xs text-text-muted mt-0.5">{bill.duedate}</p>
                   </div>
-                  <div className="font-heading font-medium text-text">{bill.amount}</div>
+                  <div className="font-heading font-medium text-text">{bill.amount} {bill.currency}</div>
                 </div>
               ))}
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

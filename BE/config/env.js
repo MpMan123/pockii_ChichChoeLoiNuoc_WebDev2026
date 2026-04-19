@@ -13,5 +13,5 @@ export const {
     DB_NAME,
     GROQ_API_KEY,
     SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
+    SUPABASE_ANON_KEY
 } = process.env;

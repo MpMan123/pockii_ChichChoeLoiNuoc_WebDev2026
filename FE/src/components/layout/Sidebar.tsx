@@ -1,19 +1,9 @@
-import { NavLink, useNavigate } from 'react-router-dom';
-import { Button, Avatar } from 'antd';
-import { LayoutDashboard, WalletCards, PiggyBank, Trophy, BookOpen, LogOut } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { Button } from 'antd';
+import { LayoutDashboard, WalletCards, Trophy, BookOpen, PiggyBank, Settings as SettingsIcon, CircleHelp, Plus } from 'lucide-react';
 import logo from '../../assets/logo.png';
-import { useAuth } from '../../context/AuthContext';
-import { logout } from '../../services/auth.service';
 
 const Sidebar = () => {
-  const navigate = useNavigate();
-  const { user, logoutUser } = useAuth();
-
-  const handleLogout = async () => {
-      await logout();
-      logoutUser();
-      navigate('/login');
-  };
 
   return (
     <aside className="w-64 max-w-[250px] border-r border-[#E2E8F0] shadow-sm flex flex-col justify-between py-8 px-6 bg-bg z-20 shrink-0">
@@ -32,7 +22,8 @@ const Sidebar = () => {
           { to: "/savings", icon: <PiggyBank size={20} />, label: "Savings" },
           { to: "/leaderboard", icon: <Trophy size={20} />, label: "Leaderboard" },
           { to: "/scholar", icon: <BookOpen size={20} />, label: "Scholar" },
-          { to: "/quizzes", icon: <Trophy size={20} />, label: "Daily Quizzes" }
+          { to: "/quizzes", icon: <Trophy size={20} />, label: "Daily Quizzes" },
+          { to: "/accounts", icon: <WalletCards size={20} />, label: "Accounts" },
         ].map((item, idx) => (
           <NavLink
             key={idx}
@@ -43,23 +34,35 @@ const Sidebar = () => {
             <span>{item.label}</span>
           </NavLink>
         ))}
-      </nav>
 
-      <div className="mt-8 pt-6 border-t border-black/5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Avatar src="https://i.pravatar.cc/150?img=1" size={40} className="border-2 border-accent-gold shadow-sm" />
-          <div className="flex flex-col">
-            <span className="text-sm font-bold text-text truncate max-w-[100px]">{user?.name || user?.email?.split('@')[0] || 'Guest'}</span>
-            <span className="text-xs font-semibold text-accent-gold">Bronze II</span>
+        <div className="mt-8 flex flex-col gap-4">
+          <Button
+            type="primary"
+            className="w-full !h-12 !bg-primary hover:!bg-primary-dark border-none !rounded-full font-semibold flex items-center justify-center gap-2 text-[15px] shadow-sm transition-transform hover:-translate-y-0.5"
+          >
+            <Plus size={18} /> New Entry
+          </Button>
+
+          <div className="flex flex-col gap-1 mt-4">
+            <NavLink
+              to="/settings"
+              className={({ isActive }) => `flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-150 border border-transparent ${isActive ? 'bg-black/5 text-text' : 'text-text-muted hover:bg-black/5 hover:text-text'}`}
+            >
+              <SettingsIcon size={20} />
+              <span>Settings</span>
+            </NavLink>
+            <NavLink
+              to="/support"
+              className={({ isActive }) => `flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-150 border border-transparent ${isActive ? 'bg-black/5 text-text' : 'text-text-muted hover:bg-black/5 hover:text-text'}`}
+            >
+              <CircleHelp size={20} />
+              <span>Support</span>
+            </NavLink>
           </div>
         </div>
-        <Button
-          type="text"
-          className="text-text-muted hover:!text-danger hover:!bg-danger/10 p-2 rounded-lg transition-all duration-150 flex items-center justify-center h-auto w-auto"
-          onClick={handleLogout}
-          icon={<LogOut size={18} />}
-        />
-      </div>
+      </nav>
+
+
     </aside>
   );
 };

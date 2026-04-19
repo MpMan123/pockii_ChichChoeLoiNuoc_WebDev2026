@@ -2,6 +2,7 @@
 -- INDEXES LẬP THEO QUY TRÌNH (WORKFLOWS)
 -- ==========================================
 
+
 -- Luồng 1: Ghi chép & Phân tích Thu/Chi
 CREATE INDEX idx_transactions_user_date ON TRANSACTIONS(UserID, TransactionDate DESC);
 CREATE INDEX idx_transactions_category ON TRANSACTIONS(TransactionCategory);
@@ -17,3 +18,6 @@ CREATE INDEX idx_daily_challenges_action_date ON DAILY_CHALLENGES(ActionType, Ap
 -- Luồng 4: Bài báo, Quiz & Đổi thưởng
 CREATE INDEX idx_rewards_level ON REWARDS(RequiredLevel);
 CREATE INDEX idx_get_rewards_user ON GET_REWARDS(UserID);
+
+-- Tạo index để truy vấn nhanh hơn theo loại chỉ số và thời gian
+CREATE INDEX idx_index_type_date ON economy_indices (index_type, as_of_date);

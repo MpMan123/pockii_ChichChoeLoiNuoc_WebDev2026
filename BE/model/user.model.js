@@ -8,9 +8,8 @@ class User {
                 password: userData.password,
                 options: {
                     data: {
-                        name: userData.name,
-                        age: userData.age,
-                        address: userData.address,
+                        name: userData.fullName,
+                        phone: userData.phoneNumber,
                     },
                 }
             })

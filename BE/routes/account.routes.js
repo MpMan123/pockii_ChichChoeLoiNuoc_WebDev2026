@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { createAccount, getAllAccounts } from "../controller/account.controller.js";
+import { createAccount, getAllAccounts, fetchPortfolio } from "../controller/account.controller.js";
+import { verifyToken } from "../middleware/auth.middleware.js";
 
 const accountRouter = Router();
 
-accountRouter.get("/accounts", getAllAccounts);
-accountRouter.post("/accounts", createAccount);
+accountRouter.get("/accounts", verifyToken, getAllAccounts);
+accountRouter.post("/accounts", verifyToken, createAccount);
+accountRouter.get("/portfolio", verifyToken, fetchPortfolio);
 
 export default accountRouter;

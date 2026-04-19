@@ -2,25 +2,24 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MessageSquare } from "lucide-react";
 import { Form, Input, Button, message } from 'antd';
-import { login, register } from "../services/auth.service";
+import { login, register } from "../services/auth.service.ts";
 import logo from "../assets/logo.png";
 import pawel from "../assets/pawel.jpg";
 import { useAuth } from "../context/AuthContext";
-
-// Xử lý loại bỏ dấu / ở cuối URL nếu có
-const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
 
 const Login = () => {
     const { loginUser } = useAuth();
     const [isLoginMode, setIsLoginMode] = useState(true);
     const [loading, setLoading] = useState(false);
     const location = useLocation();
-    const from = location.state?.from?.pathname || "/";
+
+    const from = location.state?.from?.pathname || "/login";
     const navigate = useNavigate();
 
     const onFinish = async (values: any) => {
         setLoading(true);
-        const { email, password } = values;
+        const { email, password, fullName, phoneNumber } = values;
+        console.log(values);
 
         try {
             if (isLoginMode) {
@@ -32,10 +31,11 @@ const Login = () => {
                     if (res.data.data?.user) {
                         loginUser(res.data.data.user);
                     }
-                    navigate(from, { replace: true });
+                    setIsLoginMode(true);
+                    navigate('/', { replace: true });
                 }
             } else {
-                const res = await register(email, password);
+                const res = await register(email, password, fullName, phoneNumber);
                 if (res.data.success) {
                     message.success("Đăng ký thành công! Vui lòng đăng nhập.");
                     // Chuyển về chế độ đăng nhập để login
@@ -95,6 +95,22 @@ const Login = () => {
                         requiredMark={false}
                         className="w-full"
                     >
+                        {!isLoginMode && (
+                            <Form.Item
+                                label={<span className="text-[11px] font-bold text-text-muted tracking-wider">FULL NAME</span>}
+                                name="fullName"
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập họ và tên đầy đủ!' },
+                                ]}
+                                className="mb-4"
+                            >
+                                <Input
+                                    size="large"
+                                    placeholder="Nguyễn Văn A"
+                                    className="rounded-xl border-transparent bg-[#F4F4F4] focus:bg-white hover:bg-white transition-all text-[15px] p-[10px_16px]"
+                                />
+                            </Form.Item>
+                        )}
                         <Form.Item
                             label={<span className="text-[11px] font-bold text-text-muted tracking-wider">EMAIL ADDRESS</span>}
                             name="email"
@@ -111,6 +127,22 @@ const Login = () => {
                                 className="rounded-xl border-transparent bg-[#F4F4F4] focus:bg-white hover:bg-white transition-all text-[15px] p-[10px_16px]"
                             />
                         </Form.Item>
+
+                        {!isLoginMode && <Form.Item
+                            label={<span className="text-[11px] font-bold text-text-muted tracking-wider">PHONE NUMBER</span>}
+                            name="phoneNumber"
+                            rules={[
+                                { required: true, message: 'Vui lòng nhập số điện thoại!' },
+                            ]}
+                            className="mb-4"
+                        >
+                            <Input
+                                size="large"
+                                placeholder="0123456789"
+                                className="rounded-xl border-transparent bg-[#F4F4F4] focus:bg-white hover:bg-white transition-all text-[15px] p-[10px_16px]"
+                            />
+                        </Form.Item>
+                        }
 
                         <Form.Item
                             label={

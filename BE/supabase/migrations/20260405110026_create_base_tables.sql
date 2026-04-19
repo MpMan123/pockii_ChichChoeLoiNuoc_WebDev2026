@@ -2,7 +2,7 @@ CREATE TYPE EXPENSE_NATURE AS ENUM ('Fixed', 'Variable');
 CREATE TYPE FREQUENCY_CYCLE AS ENUM ('Daily', 'Weekly', 'Monthly', 'Quarterly');
 CREATE TYPE PRIORITY_LEVEL AS ENUM ('Low', 'Medium', 'High', 'Critical');
 CREATE TYPE CHALLENGE_TYPE AS ENUM ('PAYMENT_ON_TIME', 'READ_ARTICLE', 'COMPLETE_QUIZ', 'STREAK_BONUS', 'DEBT_REDUCTION_MILESTONE');
-CREATE TYPE CURRENCY AS ENUM ('VND', 'USD', 'EUR', 'GBP', 'JPY', 'CNY');
+CREATE TYPE CURRENCY AS ENUM ('VND', 'USD', 'EUR', 'GBP', 'JPY', 'CNY', 'PERCENT');
 CREATE TYPE TRANSACTION_TYPE AS ENUM ('Income', 'Expense', 'Debt', 'Saving');
 CREATE TYPE TRANSACTION_CATEGORY AS ENUM ('Food', 'Transport', 'Salary', 'Bills', 'Other');
 CREATE TYPE VERIFICATION_METHOD AS ENUM ('Manual', 'Photo');
@@ -36,7 +36,7 @@ CREATE TABLE USERS (
 CREATE TABLE RECURRING_EXPENSES (
     ExpenseID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     ExpenseName VARCHAR(100) NOT NULL,
-    Amount DECIMAL(10, 2) NOT NULL,
+    Amount DECIMAL(18, 2) NOT NULL,
     ExpenseNature EXPENSE_NATURE NOT NULL,
     Frequency FREQUENCY_CYCLE NOT NULL,
     Description TEXT,
@@ -138,6 +138,7 @@ CREATE TABLE BILLS (
     IsPaid BOOLEAN DEFAULT FALSE,
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Currency CURRENCY DEFAULT 'VND',
 
     UserID UUID NOT NULL,
     FOREIGN KEY (UserID) REFERENCES USERS(UserID) ON DELETE CASCADE
@@ -146,8 +147,8 @@ CREATE TABLE BILLS (
 CREATE TABLE SAVING_PLANS (
     SavingPlanID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     PlanName VARCHAR(100) NOT NULL,
-    CurrentTargetAmount DECIMAL(10, 2) NOT NULL,
-    FinalTargetAmount DECIMAL(10, 2) DEFAULT 0,
+    CurrentTargetAmount DECIMAL(18, 2) NOT NULL,
+    FinalTargetAmount DECIMAL(18, 2) DEFAULT 0,
     InterestRate NUMERIC(6, 4), -- Lãi suất mỗi năm (nếu có)
     StartDate DATE NOT NULL,
     EndDate DATE NOT NULL,
@@ -164,7 +165,7 @@ CREATE TABLE ACCOUNTS (
     AccountID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     AccountName VARCHAR(100) NOT NULL,
     AccountType VARCHAR(50) NOT NULL, --ATM, Momo, Bank
-    Balance DECIMAL(10, 2) DEFAULT 0,
+    Balance DECIMAL(18, 2) DEFAULT 0,
     Currency CURRENCY DEFAULT 'VND',
     
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -177,11 +178,11 @@ CREATE TABLE ACCOUNTS (
 CREATE TABLE WITHDRAW_FROM (
     WithdrawID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     WithdrawName VARCHAR(100) NOT NULL,
-    Amount DECIMAL(10, 2) NOT NULL,
+    Amount DECIMAL(18, 2) NOT NULL,
     WithdrawDate DATE NOT NULL,
 
     AllocatedPercentage DECIMAL(5, 5) NOT NULL, --0.2, 0.24
-    AllocatedAmount DECIMAL(10, 2) NOT NULL, --0.2 * 1000000 = 200000
+    AllocatedAmount DECIMAL(18, 2) NOT NULL, --0.2 * 1000000 = 200000
     
     SavingPlanID INT NOT NULL,
     AccountID INT NOT NULL,
@@ -193,11 +194,12 @@ CREATE TABLE WITHDRAW_FROM (
 
 CREATE TABLE TRANSACTIONS (
     TransactionID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    ActualAmount DECIMAL(10, 2) NOT NULL,
+    ActualAmount DECIMAL(18, 2) NOT NULL,
     TransactionDate DATE NOT NULL,
     TransactionType TRANSACTION_TYPE NOT NULL, --Income, Expense
     TransactionCategory TRANSACTION_CATEGORY NOT NULL, --Food, Transport, Salary
     TransactionDescription TEXT,
+    Currency CURRENCY DEFAULT 'VND',
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     RecordedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     VerificationMethod VERIFICATION_METHOD NOT NULL,
@@ -233,7 +235,8 @@ CREATE TABLE DEBTS (
     CurrentBalance NUMERIC(15, 2) NOT NULL,
     FlatInterestRate NUMERIC(6, 4) NOT NULL, -- Sinh ra do Frontend nhập
     EffectiveInterestRate NUMERIC(6, 4),     -- Có thể tính toán tự động
-    
+    Currency CURRENCY DEFAULT 'VND',
+    Priority PRIORITY_LEVEL DEFAULT 'Medium',
     EstimatedMaturityDate DATE,
 
     StartDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -305,25 +308,29 @@ CREATE TABLE PARTICIPATE_CHALLENGES (
     UNIQUE(AttemptID, UserID)
 );
 
--- ==========================================
--- INDEXES LẬP THEO QUY TRÌNH (WORKFLOWS)
--- ==========================================
+CREATE TABLE economy_indices (
+    index_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    index_type VARCHAR(50) NOT NULL, -- Loại chỉ số (ví dụ: CPI, Interest Rate, GDP, Gold)
+    index_value DECIMAL(18, 4) NOT NULL, -- Giá trị của chỉ số
+    period VARCHAR(20), -- Kỳ báo cáo (ví dụ: Q1/2026, April 2026)
+    as_of_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(), -- Thời điểm ghi nhận
+    currency_code CURRENCY DEFAULT 'VND',
+    relevance_weight DECIMAL(5, 2), -- Trọng số ảnh hưởng AI (0.00 đến 1.00)
+    description TEXT -- Mô tả chi tiết thêm
+);
 
--- Luồng 1: Ghi chép & Phân tích Thu/Chi
-CREATE INDEX idx_transactions_user_date ON TRANSACTIONS(UserID, TransactionDate DESC);
-CREATE INDEX idx_transactions_category ON TRANSACTIONS(TransactionCategory);
+CREATE TABLE exchange_rates (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    from_currency VARCHAR(10) NOT NULL, -- Ví dụ: 'USD', 'EUR', 'BTC'
+    to_currency VARCHAR(10) NOT NULL,   -- Thường mặc định là 'VND' hoặc 'USD'
+    rate DECIMAL(18, 6) NOT NULL,       -- Tỷ giá (ví dụ: 25350.000000)
+    last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    provider VARCHAR(50),               -- Nguồn lấy tỷ giá (Binance, Vietcombank, v.v.)
+    
+    UNIQUE(from_currency, to_currency)
+);
 
--- Luồng 2: Nhắc nhở Hóa đơn & Quản lý Nợ
-CREATE INDEX idx_bills_user_unpaid ON BILLS(UserID, DueDate ASC) WHERE IsPaid = FALSE;
-CREATE INDEX idx_debts_user ON DEBTS(UserID);
 
--- Luồng 3: Gamification - Thử thách & Tích điểm
-CREATE INDEX idx_challenge_history_user_completed ON CHALLENGE_HISTORIES(UserID, CompletedAt DESC);
-CREATE INDEX idx_daily_challenges_action_date ON DAILY_CHALLENGES(ActionType, ApplicableDate);
-
--- Luồng 4: Bài báo, Quiz & Đổi thưởng
-CREATE INDEX idx_rewards_level ON REWARDS(RequiredLevel);
-CREATE INDEX idx_get_rewards_user ON GET_REWARDS(UserID);
 
 -- ==========================================
 -- ENABLE ROW LEVEL SECURITY (RLS)
@@ -363,21 +370,123 @@ CREATE POLICY "Public Read Only for Sponsors" ON SPONSORS FOR SELECT USING (true
 CREATE POLICY "Public Read Only for Rewards" ON REWARDS FOR SELECT USING (true);
 
 -- 2. Bảng Dữ Liệu Cá nhân (User nào thì chỉ được thao tác trên dòng của User đó)
-CREATE POLICY "Isolate Users Data" ON USERS FOR ALL USING ( auth.uid() = UserID );
-CREATE POLICY "Isolate Recurring Expenses Data" ON RECURRING_EXPENSES FOR ALL USING ( auth.uid() = UserID );
-CREATE POLICY "Isolate Attempts Data" ON ATTEMPTS FOR ALL USING ( auth.uid() = UserID );
-CREATE POLICY "Isolate Challenge Histories Data" ON CHALLENGE_HISTORIES FOR ALL USING ( auth.uid() = UserID );
-CREATE POLICY "Isolate Bills Data" ON BILLS FOR ALL USING ( auth.uid() = UserID );
-CREATE POLICY "Isolate Saving Plans Data" ON SAVING_PLANS FOR ALL USING ( auth.uid() = UserID );
-CREATE POLICY "Isolate Accounts Data" ON ACCOUNTS FOR ALL USING ( auth.uid() = UserID );
-CREATE POLICY "Isolate Transactions Data" ON TRANSACTIONS FOR ALL USING ( auth.uid() = UserID );
-CREATE POLICY "Isolate Debts Data" ON DEBTS FOR ALL USING ( auth.uid() = UserID );
-CREATE POLICY "Isolate Get Rewards Data" ON GET_REWARDS FOR ALL USING ( auth.uid() = UserID );
-CREATE POLICY "Isolate Participate Challenges Data" ON PARTICIPATE_CHALLENGES FOR ALL USING ( auth.uid() = UserID );
+CREATE POLICY "Isolate Users Data" ON USERS FOR ALL USING ( auth.uid() = userid );
+CREATE POLICY "Isolate Recurring Expenses Data" ON RECURRING_EXPENSES FOR ALL USING ( auth.uid() = userid );
+CREATE POLICY "Isolate Attempts Data" ON ATTEMPTS FOR ALL USING ( auth.uid() = userid );
+CREATE POLICY "Isolate Challenge Histories Data" ON CHALLENGE_HISTORIES FOR ALL USING ( auth.uid() = userid );
+CREATE POLICY "Isolate Bills Data" ON BILLS FOR ALL USING ( auth.uid() = userid );
+CREATE POLICY "Isolate Saving Plans Data" ON SAVING_PLANS FOR ALL USING ( auth.uid() = userid );
+CREATE POLICY "Isolate Accounts Data" ON ACCOUNTS FOR ALL USING ( auth.uid() = userid );
+CREATE POLICY "Isolate Transactions Data" ON TRANSACTIONS FOR ALL USING ( auth.uid() = userid );
+CREATE POLICY "Isolate Debts Data" ON DEBTS FOR ALL USING ( auth.uid() = userid );
+CREATE POLICY "Isolate Get Rewards Data" ON GET_REWARDS FOR ALL USING ( auth.uid() = userid );
+CREATE POLICY "Isolate Participate Challenges Data" ON PARTICIPATE_CHALLENGES FOR ALL USING ( auth.uid() = userid );
 
 -- 3. Đặc biệt: Quyền truy cập các bảng rẽ nhánh
 CREATE POLICY "Isolate Withdrawals" ON WITHDRAW_FROM FOR ALL USING (
-    EXISTS (SELECT 1 FROM SAVING_PLANS WHERE SAVING_PLANS.SavingPlanID = WITHDRAW_FROM.SavingPlanID AND auth.uid() = SAVING_PLANS.UserID)
+    EXISTS (SELECT 1 FROM SAVING_PLANS WHERE SAVING_PLANS.SavingPlanID = WITHDRAW_FROM.SavingPlanID AND auth.uid() = SAVING_PLANS.userid)
 );
 
 -- ==========================================
+-- TRIGGERS
+-- ==========================================
+
+-- Tạo hàm handle_new_user để sync qua public.users
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.users (UserID, Email, FullName, LevelID)
+  VALUES (new.id, new.email, new.raw_user_meta_data->>'name', 1);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Gắn trigger vào bảng auth.users của Supabase
+CREATE TRIGGER update_users_on_auth_user
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- Tao ham pay_user_bill
+CREATE OR REPLACE FUNCTION public.pay_user_bill(
+    p_user_id UUID,
+    p_bill_id INT,
+    p_account_id INT,
+    p_amount DECIMAL
+)
+RETURNS VOID AS $$
+BEGIN
+    -- Update bill status
+    UPDATE BILLS
+    SET IsPaid = TRUE
+    WHERE BillID = p_bill_id;
+
+    -- Update account balance
+    UPDATE ACCOUNTS
+    SET Balance = Balance - p_amount
+    WHERE AccountID = p_account_id;
+
+    -- Insert transaction
+    INSERT INTO TRANSACTIONS (
+        UserID,
+        ActualAmount,
+        TransactionType,
+        TransactionCategory,
+        VerificationMethod,
+        TransactionDescription,
+        Priority,
+        AccountID
+    )
+    VALUES (
+        p_user_id,
+        p_amount,
+        'Expense',
+        'Bills',
+        'Manual',
+        'Paid bill',
+        'High',
+        p_account_id
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION public.make_deposit(
+    p_user_id UUID,
+    p_saving_id INT,
+    p_amount DECIMAL,
+    p_account_id INT
+)
+RETURNS VOID AS $$
+BEGIN
+    -- Update account balance
+    UPDATE ACCOUNTS
+    SET BALANCE = BALANCE - p_amount
+    WHERE AccountId = p_account_id;
+
+    -- Update saving plan balance
+    UPDATE SAVING_PLANS
+    SET CurrentAmount = CurrentAmount + p_amount
+    WHERE SavingPlanID = p_saving_id;
+
+    -- Insert transaction
+    INSERT INTO TRANSACTIONS (
+        UserID,
+        ActualAmount,
+        TransactionType,
+        TransactionCategory,
+        VerificationMethod,
+        TransactionDescription,
+        Priority,
+        AccountID
+    )
+    VALUES (
+        p_user_id,
+        p_amount,
+        'Income',
+        'Savings',
+        'Manual',
+        'Deposit to saving plan',
+        'High',
+        p_account_id
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

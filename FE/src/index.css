@@ -8,7 +8,7 @@
   /* --color-primary-dark: #0A3F2E; */
   --color-primary-dark: #259B73;
   --color-dark: #1F2937;
-
+  --color-text-button: #8B5E3C;
   --color-accent-gold: #D2A868;
   --color-accent-gold-light: #E6C895;
 
@@ -23,6 +23,8 @@
 
   --font-sans: 'Inter', sans-serif;
   --font-heading: 'Outfit', sans-serif;
+
+  --color-form-bg: #EAE7E1;
 }
 
 @utility glass {
@@ -118,27 +120,33 @@
 :where(.css-dev-only-do-not-override-1w1f1q3).ant-table-wrapper .ant-table {
   background: transparent !important;
 }
+
 .ant-table-wrapper .ant-table {
   background: transparent !important;
 }
-.ant-table-wrapper .ant-table-thead > tr > th {
+
+.ant-table-wrapper .ant-table-thead>tr>th {
   background: transparent !important;
-  border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
   color: var(--color-text-muted) !important;
   font-weight: 600 !important;
   padding: 0 0 12px 0 !important;
 }
-.ant-table-wrapper .ant-table-thead > tr > th::before {
+
+.ant-table-wrapper .ant-table-thead>tr>th::before {
   display: none !important;
 }
-.ant-table-wrapper .ant-table-tbody > tr > td {
-  border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+
+.ant-table-wrapper .ant-table-tbody>tr>td {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
   background: transparent !important;
   padding: 16px 0 !important;
 }
-.ant-table-wrapper .ant-table-tbody > tr:hover > td {
-  background: rgba(0,0,0,0.02) !important;
+
+.ant-table-wrapper .ant-table-tbody>tr:hover>td {
+  background: rgba(0, 0, 0, 0.02) !important;
 }
+
 .ant-btn-text:hover {
-  background-color: rgba(0,0,0,0.05) !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
 }

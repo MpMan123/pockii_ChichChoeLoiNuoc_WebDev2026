@@ -3,20 +3,20 @@ import {
     createBill,
     getAllBills,
     getBillById,
-    getBillStatus,
+    // getBillStatus,
     updateBill
 } from '../controller/bill.controller.js';
 import { verifyToken } from '../middleware/auth.middleware.js';
 import { validateRequest } from '../middleware/validation.middleware.js';
-import { BillSchema, PayBillSchema } from '../schema/InputSchema.schema.js';
+import { BillSchema, PayBillSchema } from '../schema/input.schema.js';
 const billRouter = Router();
 
-billRouter.get('/bills', verifyToken, getAllBills);
-billRouter.post('/bills', validateRequest(BillSchema), verifyToken, createBill);
-billRouter.get('/bills/:id', verifyToken, getBillById);
+billRouter.get('/', verifyToken, getAllBills);
+billRouter.post('/', validateRequest(BillSchema), verifyToken, createBill);
+billRouter.get('/:id', verifyToken, getBillById);
 
-billRouter.put('/bills/:id/pay', validateRequest(PayBillSchema), verifyToken, updateBill);
+billRouter.put('/:id/pay', validateRequest(PayBillSchema), verifyToken, updateBill);
 
-billRouter.get('/bills/status', verifyToken, getBillStatus);
+// billRouter.get('/status', verifyToken, getBillStatus);
 
 export default billRouter;

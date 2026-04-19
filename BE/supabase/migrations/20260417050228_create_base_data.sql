@@ -41,6 +41,8 @@ INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, e
 ('00000000-0000-0000-0000-000000000000', 'e0000000-0000-0000-0000-000000000011', 'authenticated', 'authenticated', 'user11@gmail.com', crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"name": "User 11"}', now(), now(), '', '', '', '');
 INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token, email_change, email_change_token_new, recovery_token) VALUES
 ('00000000-0000-0000-0000-000000000000', 'e0000000-0000-0000-0000-000000000012', 'authenticated', 'authenticated', 'user12@gmail.com', crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"name": "User 12"}', now(), now(), '', '', '', '');
+INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token, email_change, email_change_token_new, recovery_token) VALUES
+('00000000-0000-0000-0000-000000000000', 'e0000000-0000-0000-0000-000000000013', 'authenticated', 'authenticated', 'mm@gmail.com', crypt('123456789', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"name": "Minh", "phone": "0123456789"}', now(), now(), '', '', '', '');
 
 -- SET LEVELS FOR USERS
 UPDATE USERS SET LevelID = (SELECT LevelID FROM LEVELS ORDER BY random() LIMIT 1);
@@ -88,7 +90,10 @@ INSERT INTO ACCOUNTS (AccountName, AccountType, Balance, Currency, UserID) VALUE
 ('Account 9', 'Bank', 90000, 'VND', 'e0000000-0000-0000-0000-000000000009'),
 ('Account 10', 'Bank', 100000, 'VND', 'e0000000-0000-0000-0000-000000000010'),
 ('Account 11', 'Bank', 110000, 'VND', 'e0000000-0000-0000-0000-000000000011'),
-('Account 12', 'Bank', 120000, 'VND', 'e0000000-0000-0000-0000-000000000012');
+('Account 12', 'Bank', 120000, 'VND', 'e0000000-0000-0000-0000-000000000012'),
+('Account 13', 'Bank', 130000, 'VND', 'e0000000-0000-0000-0000-000000000013'),
+('Account 14', 'Bank', 130000, 'USD', 'e0000000-0000-0000-0000-000000000013'),
+('Account 15', 'Bank', 130000, 'EUR', 'e0000000-0000-0000-0000-000000000013');
 
 -- RECURRING_EXPENSES
 INSERT INTO RECURRING_EXPENSES (ExpenseName, Amount, ExpenseNature, Frequency, UserID) VALUES
@@ -106,19 +111,22 @@ INSERT INTO RECURRING_EXPENSES (ExpenseName, Amount, ExpenseNature, Frequency, U
 ('Rent 12', 12000, 'Fixed', 'Monthly', 'e0000000-0000-0000-0000-000000000012');
 
 -- BILLS
-INSERT INTO BILLS (BillName, Amount, DueDate, UserID) VALUES
-('Water Bill 1', 100, CURRENT_DATE + interval '1 days', 'e0000000-0000-0000-0000-000000000001'),
-('Water Bill 2', 200, CURRENT_DATE + interval '2 days', 'e0000000-0000-0000-0000-000000000002'),
-('Water Bill 3', 300, CURRENT_DATE + interval '3 days', 'e0000000-0000-0000-0000-000000000003'),
-('Water Bill 4', 400, CURRENT_DATE + interval '4 days', 'e0000000-0000-0000-0000-000000000004'),
-('Water Bill 5', 500, CURRENT_DATE + interval '5 days', 'e0000000-0000-0000-0000-000000000005'),
-('Water Bill 6', 600, CURRENT_DATE + interval '6 days', 'e0000000-0000-0000-0000-000000000006'),
-('Water Bill 7', 700, CURRENT_DATE + interval '7 days', 'e0000000-0000-0000-0000-000000000007'),
-('Water Bill 8', 800, CURRENT_DATE + interval '8 days', 'e0000000-0000-0000-0000-000000000008'),
-('Water Bill 9', 900, CURRENT_DATE + interval '9 days', 'e0000000-0000-0000-0000-000000000009'),
-('Water Bill 10', 1000, CURRENT_DATE + interval '10 days', 'e0000000-0000-0000-0000-000000000010'),
-('Water Bill 11', 1100, CURRENT_DATE + interval '11 days', 'e0000000-0000-0000-0000-000000000011'),
-('Water Bill 12', 1200, CURRENT_DATE + interval '12 days', 'e0000000-0000-0000-0000-000000000012');
+INSERT INTO BILLS (BillName, Amount, DueDate, Currency, UserID) VALUES
+('Water Bill 1', 100, CURRENT_DATE + interval '1 days', 'VND', 'e0000000-0000-0000-0000-000000000001'),
+('Water Bill 2', 200, CURRENT_DATE + interval '2 days', 'VND', 'e0000000-0000-0000-0000-000000000002'),
+('Water Bill 3', 300, CURRENT_DATE + interval '3 days', 'VND', 'e0000000-0000-0000-0000-000000000003'),
+('Water Bill 4', 400, CURRENT_DATE + interval '4 days', 'VND', 'e0000000-0000-0000-0000-000000000004'),
+('Water Bill 5', 500, CURRENT_DATE + interval '5 days', 'VND', 'e0000000-0000-0000-0000-000000000005'),
+('Water Bill 6', 600, CURRENT_DATE + interval '6 days', 'VND', 'e0000000-0000-0000-0000-000000000006'),
+('Water Bill 7', 700, CURRENT_DATE + interval '7 days', 'VND', 'e0000000-0000-0000-0000-000000000007'),
+('Water Bill 8', 800, CURRENT_DATE + interval '8 days', 'VND', 'e0000000-0000-0000-0000-000000000008'),
+('Water Bill 9', 900, CURRENT_DATE + interval '9 days', 'VND', 'e0000000-0000-0000-0000-000000000009'),
+('Water Bill 10', 1000, CURRENT_DATE + interval '10 days', 'VND', 'e0000000-0000-0000-0000-000000000010'),
+('Water Bill 11', 1100, CURRENT_DATE + interval '11 days', 'VND', 'e0000000-0000-0000-0000-000000000011'),
+('Water Bill 12', 1200, CURRENT_DATE + interval '12 days', 'VND', 'e0000000-0000-0000-0000-000000000012'),
+('Water Bill 13', 1300, CURRENT_DATE + interval '13 days', 'VND', 'e0000000-0000-0000-0000-000000000013'),
+('Water Bill 14', 1400, CURRENT_DATE + interval '14 days', 'VND', 'e0000000-0000-0000-0000-000000000013'),
+('Water Bill 15', 1500, CURRENT_DATE + interval '15 days', 'VND', 'e0000000-0000-0000-0000-000000000013');
 
 -- SAVING_PLANS
 INSERT INTO SAVING_PLANS (PlanName, CurrentTargetAmount, StartDate, EndDate, UserID) VALUES
@@ -136,34 +144,40 @@ INSERT INTO SAVING_PLANS (PlanName, CurrentTargetAmount, StartDate, EndDate, Use
 ('Laptop 12', 240000, CURRENT_DATE, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000012');
 
 -- TRANSACTIONS
-INSERT INTO TRANSACTIONS (ActualAmount, TransactionDate, TransactionType, TransactionCategory, VerificationMethod, UserID, AccountID) VALUES
-(100, CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000001', 1),
-(200, CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000002', 2),
-(300, CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000003', 3),
-(400, CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000004', 4),
-(500, CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000005', 5),
-(600, CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000006', 6),
-(700, CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000007', 7),
-(800, CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000008', 8),
-(900, CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000009', 9),
-(1000, CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000010', 10),
-(1100, CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000011', 11),
-(1200, CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000012', 12);
+INSERT INTO TRANSACTIONS (ActualAmount, Currency, TransactionDate, TransactionType, TransactionCategory, VerificationMethod, UserID, AccountID) VALUES
+(100, 'VND', CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000001', 1),
+(200, 'VND', CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000002', 2),
+(300, 'USD', CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000003', 3),
+(400, 'VND', CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000004', 4),
+(500, 'VND', CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000005', 5),
+(600, 'USD', CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000006', 6),
+(700, 'VND', CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000007', 7),
+(800, 'VND', CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000008', 8),
+(900, 'USD', CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000009', 9),
+(1000, 'VND', CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000010', 10),
+(1100, 'USD', CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000011', 11),
+(1200, 'VND', CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000012', 12),
+(-100000, 'VND', CURRENT_DATE, 'Expense', 'Food', 'Manual', 'e0000000-0000-0000-0000-000000000013', 13),
+(200000, 'USD', CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000013', 13),
+(300000, 'EUR', CURRENT_DATE, 'Income', 'Salary', 'Manual', 'e0000000-0000-0000-0000-000000000013', 13);
 
 -- DEBTS
-INSERT INTO DEBTS (DebtName, InitialPrincipal, CurrentBalance, FlatInterestRate, EndDate, UserID, StrategyID) VALUES
-('Credit Card 1', 5000, 5000, 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000001', 1),
-('Credit Card 2', 10000, 10000, 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000002', 2),
-('Credit Card 3', 15000, 15000, 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000003', 3),
-('Credit Card 4', 20000, 20000, 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000004', 4),
-('Credit Card 5', 25000, 25000, 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000005', 5),
-('Credit Card 6', 30000, 30000, 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000006', 6),
-('Credit Card 7', 35000, 35000, 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000007', 7),
-('Credit Card 8', 40000, 40000, 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000008', 8),
-('Credit Card 9', 45000, 45000, 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000009', 9),
-('Credit Card 10', 50000, 50000, 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000010', 10),
-('Credit Card 11', 55000, 55000, 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000011', 11),
-('Credit Card 12', 60000, 60000, 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000012', 12);
+INSERT INTO DEBTS (DebtName, InitialPrincipal, CurrentBalance, Currency, FlatInterestRate, EndDate, UserID, StrategyID) VALUES
+('Credit Card 1', 5000, 5000, 'VND', 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000001', 1),
+('Credit Card 2', 10000, 10000, 'VND', 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000002', 2),
+('Credit Card 3', 15000, 15000, 'VND', 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000003', 3),
+('Credit Card 4', 20000, 20000, 'VND', 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000004', 4),
+('Credit Card 5', 25000, 25000, 'VND', 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000005', 5),
+('Credit Card 6', 30000, 30000, 'VND', 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000006', 6),
+('Credit Card 7', 35000, 35000, 'VND', 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000007', 7),
+('Credit Card 8', 40000, 40000, 'VND', 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000008', 8),
+('Credit Card 9', 45000, 45000, 'VND', 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000009', 9),
+('Credit Card 10', 50000, 50000, 'VND', 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000010', 10),
+('Credit Card 11', 55000, 55000, 'VND', 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000011', 11),
+('Credit Card 12', 60000, 60000, 'VND', 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000012', 12),
+('Credit Card 13', 50000, 50000, 'VND', 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000013', 12),
+('Credit Card 14', 55000, 55000, 'VND', 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000013', 1),
+('Credit Card 15', 60000, 60000, 'VND', 0.05, CURRENT_DATE + interval '30 days', 'e0000000-0000-0000-0000-000000000013', 4);
 
 -- ARTICLES
 INSERT INTO ARTICLES (Title, ArticleURL) VALUES
@@ -284,3 +298,21 @@ INSERT INTO PARTICIPATE_CHALLENGES (AttemptID, UserID) VALUES
 (10, 'e0000000-0000-0000-0000-000000000010'),
 (11, 'e0000000-0000-0000-0000-000000000011'),
 (12, 'e0000000-0000-0000-0000-000000000012');
+
+INSERT INTO exchange_rates 
+(from_currency, to_currency, rate, provider, last_updated)
+VALUES 
+-- Quy đổi các đồng tiền chính sang VND (Base là VND)
+('USD', 'VND', 25350.00, 'Vietcombank API', NOW()),
+('EUR', 'VND', 27120.50, 'Vietcombank API', NOW()),
+('JPY', 'VND', 164.15, 'Vietcombank API', NOW()),
+('GBP', 'VND', 31500.00, 'HSBC Exchange', NOW()),
+
+-- Quy đổi Crypto sang USD (Sau đó dùng USD quy đổi tiếp sang VND)
+('BTC', 'USD', 72400.50, 'Binance Oracle', NOW()),
+('ETH', 'USD', 3850.20, 'Binance Oracle', NOW()),
+('SOL', 'USD', 145.10, 'Binance Oracle', NOW()),
+
+-- Quy đổi nội bộ cho các tài sản khác
+('GOLD', 'VND', 85500000.00, 'SJC Price Feed', NOW()), -- Giá trên 1 lượng
+('SATS', 'USD', 0.000724, 'Blockchain Index', NOW()); -- 1 Satoshi

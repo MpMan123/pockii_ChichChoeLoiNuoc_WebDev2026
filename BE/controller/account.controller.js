@@ -1,4 +1,4 @@
-import supabase from "../config/database.js";
+import supabase from "../config/supabase.js";
 import Account from "../model/account.model.js";
 
 export const getAllAccounts = async (req, res) => {
@@ -53,6 +53,31 @@ export const updateAccount = async (req, res) => {
         });
     } catch (error) {
         console.log('error', error);
+        res.status(500).json({ error: error.message });
+    }
+}
+
+export const fetchPortfolio = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { data, error } = await supabase.rpc('get_portfolio_total', { p_user_id: userId });
+        console.log("test portfolio", data);
+        if (error) {
+            console.error('error', error);
+        }
+        if (!data) {
+            res.status(404).json({
+                status: "error",
+                message: "Không tìm thấy portfolio"
+            });
+            return;
+        }
+        res.status(200).json({
+            status: "success",
+            data: data
+        });
+    } catch (error) {
+        console.log("error", error);
         res.status(500).json({ error: error.message });
     }
 }
