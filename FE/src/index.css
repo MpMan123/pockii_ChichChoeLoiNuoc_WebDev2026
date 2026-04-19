@@ -1,111 +1,152 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+@import "tailwindcss";
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@theme {
+  --color-primary: #115E45;
+  --color-primary-light: #1A825F;
+  /* --color-primary-dark: #0A3F2E; */
+  --color-primary-dark: #259B73;
+  --color-dark: #1F2937;
+  --color-text-button: #8B5E3C;
+  --color-accent-gold: #D2A868;
+  --color-accent-gold-light: #E6C895;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
+  --color-bg: #F5F3EE;
+  --color-text: #1F2937;
+  --color-text-muted: #6B7280;
+  --color-text-light: #9CA3AF;
+
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+
+  --font-sans: 'Inter', sans-serif;
+  --font-heading: 'Outfit', sans-serif;
+
+  --color-form-bg: #EAE7E1;
+}
+
+@utility glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    color: var(--color-primary-dark);
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
+@utility btn {
   display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition-property: all;
+  transition-duration: 150ms;
+  cursor: pointer;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+@utility btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+
+  &:hover {
+    background-color: var(--color-primary-dark);
+    transform: translateY(-1px);
+  }
+}
+
+@utility btn-secondary {
+  background-color: transparent;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+
+  &:hover {
+    background-color: rgba(17, 94, 69, 0.05);
+  }
+}
+
+@utility btn-outline {
+  border: 1px solid #E2E8F0;
+  background-color: white;
+  color: var(--color-text);
+
+  &:hover {
+    background-color: #F8FAFC;
+  }
+}
+
+@utility badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: #F1F5F9;
+  color: var(--color-text-muted);
+}
+
+@utility badge-warning {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #D97706;
+}
+
+@utility badge-success {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #059669;
+}
+
+/* Ant Design Global Overrides specifically for Transparent/Glassmorphism Tables & Buttons */
+:where(.css-dev-only-do-not-override-1w1f1q3).ant-table-wrapper .ant-table {
+  background: transparent !important;
+}
+
+.ant-table-wrapper .ant-table {
+  background: transparent !important;
+}
+
+.ant-table-wrapper .ant-table-thead>tr>th {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+  color: var(--color-text-muted) !important;
+  font-weight: 600 !important;
+  padding: 0 0 12px 0 !important;
+}
+
+.ant-table-wrapper .ant-table-thead>tr>th::before {
+  display: none !important;
+}
+
+.ant-table-wrapper .ant-table-tbody>tr>td {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+  background: transparent !important;
+  padding: 16px 0 !important;
+}
+
+.ant-table-wrapper .ant-table-tbody>tr:hover>td {
+  background: rgba(0, 0, 0, 0.02) !important;
+}
+
+.ant-btn-text:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
 }

@@ -1,35 +1,53 @@
-import { pool } from '../config/database.js';
+import supabase from "../config/supabase.js";
 
 class User {
     static createUser = async (userData) => {
-        const { name, age, address } = userData;
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email: userData.email,
+                password: userData.password,
+                options: {
+                    data: {
+                        name: userData.fullName,
+                        phone: userData.phoneNumber,
+                    },
+                }
+            })
 
-        const [result] = await pool.execute(
-            `INSERT INTO user (name, age, address) VALUES (?, ?, ?)`,
-            [name, age, address]
-        );
-        return result;
+            return { data, error };
+        } catch (error) {
+            console.log(error);
+        }
     }
 
-    static getAllUser = async () => {
-        const [rows] = await pool.execute(
-            `SELECT * FROM user`
-        );
-        return rows;
-    }
+    static findUserByEmail = async (email) => {
+        const { data: user, error } = await supabase
+            .from("users")
+            .select("*")
+            .eq("email", email)
+            .single();
 
-    static findUserById = async (id) => {
-        const [rows] = await pool.execute(
-            `SELECT * FROM user WHERE id=?`
-            , [id]);
-        return rows[0];
+
+        if (error) {
+            throw error;
+        }
+
+        return user;
     }
 
     static findUserByAddress = async (address) => {
-        const [rows] = await pool.execute(
-            `SELECT * FROM user WHERE address=?`
-            , [address]);
-        return rows[0];
+        const { data: user, error } = await supabase
+            .from("users")
+            .select("*")
+            .eq("address", address)
+            .single();
+
+
+        if (error) {
+            throw error;
+        }
+
+        return user;
     }
 }
 export default User;
