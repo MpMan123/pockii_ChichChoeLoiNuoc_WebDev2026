@@ -15,15 +15,22 @@ interface Transaction {
   type: string;
 }
 
+interface Bill {
+  billname: string;
+  duedate: string;
+  amount: number;
+  currency: string;
+}
+
 import { useAuth } from '../context/AuthContext';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const [data, setData] = useState<Transaction[]>([]);
+  const [transactions, setTransaction] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [portfolio, setPortfolio] = useState(0);
-  const [bills, setBills] = useState([]);
+  const [bills, setBills] = useState<Bill[]>([]);
 
   const formatCurrency = (amount: number | null) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -38,8 +45,10 @@ const Dashboard = () => {
     const loadPortfolio = async () => {
       try {
         const response = await fetchPortfolio();
-        setPortfolio(response.data.data);
-        console.log("PORTFOLIO", response.data.data)
+        if (!response.data.data) {
+          setPortfolio(0);
+        }
+        else setPortfolio(response.data.data);
       } catch (err: any) {
         console.error("Failed to fetch portfolio:", err);
       }
@@ -48,7 +57,6 @@ const Dashboard = () => {
       try {
         const response = await fetchBills({ isPaid: false, inOrder: true });
         setBills(response.data);
-        console.log("BILLS", bills);
       } catch (err: any) {
         console.error("Failed to fetch bills:", err);
       }
@@ -66,7 +74,7 @@ const Dashboard = () => {
             amount: `${item.actualamount > 0 ? '+' : ''}${item.actualamount || 0} ${item.currency}`,
             type: item.transactiontype === 'expense' ? 'expense' : 'income'
           }));
-          setData(formattedData);
+          setTransaction(formattedData);
         }
       } catch (err: any) {
         console.error("Failed to fetch transactions:", err);
@@ -153,7 +161,7 @@ const Dashboard = () => {
               ) : (
                 <Table
                   columns={columns}
-                  dataSource={data}
+                  dataSource={transactions}
                   pagination={{ pageSize: 5 }}
                   rowKey="key"
                   loading={isLoading}
@@ -172,12 +180,9 @@ const Dashboard = () => {
               <Button type="link" className="!p-0 text-primary hover:underline font-semibold font-sans">View All</Button>
             </div>
 
-            {/* <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4">
               {bills.map((bill, i) => (
                 <div key={i} className="flex items-center gap-4 p-4 rounded-xl border border-black/5 hover:shadow-sm transition-all hover:-translate-y-0.5 cursor-pointer">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${bill.bg}`}>
-                    {bill.icon}
-                  </div>
                   <div className="flex-1">
                     <h4 className="font-semibold text-sm text-text">{bill.billname}</h4>
                     <p className="text-xs text-text-muted mt-0.5">{bill.duedate}</p>
@@ -185,7 +190,7 @@ const Dashboard = () => {
                   <div className="font-heading font-medium text-text">{bill.amount} {bill.currency}</div>
                 </div>
               ))}
-            </div> */}
+            </div>
           </div>
         </div>
       </div>

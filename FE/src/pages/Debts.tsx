@@ -20,6 +20,7 @@ const Debts = () => {
       }
 
       await createDebt(payload);
+      form.resetFields();
     } catch (error) {
       console.error(error);
     }

@@ -1,5 +1,8 @@
 import { config } from 'dotenv'
-config({ path: '.env' });
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development'
+config({ path: envFile });
+
+console.log("Version", envFile);
 
 export const {
     PORT,

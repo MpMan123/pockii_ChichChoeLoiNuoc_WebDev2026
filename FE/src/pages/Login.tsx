@@ -19,12 +19,10 @@ const Login = () => {
     const onFinish = async (values: any) => {
         setLoading(true);
         const { email, password, fullName, phoneNumber } = values;
-        console.log(values);
 
         try {
             if (isLoginMode) {
                 const res = await login(email, password);
-                console.log(res.data);
                 if (res.data.success) {
                     message.success("Đăng nhập thành công!");
                     // Token is now secured automatically by HttpOnly Cookie from Backend
@@ -32,7 +30,7 @@ const Login = () => {
                         loginUser(res.data.data.user);
                     }
                     setIsLoginMode(true);
-                    navigate('/', { replace: true });
+                    navigate('/dashboard', { replace: true });
                 }
             } else {
                 const res = await register(email, password, fullName, phoneNumber);
