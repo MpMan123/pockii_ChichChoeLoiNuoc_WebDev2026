@@ -1,4 +1,4 @@
-import { CheckCircle2, ChevronRight, PlayCircle, CheckCircle, Clock } from 'lucide-react';
+import { CheckCircle2, PlayCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const DailyQuizzes = () => {

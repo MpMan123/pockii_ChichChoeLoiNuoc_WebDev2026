@@ -1,4 +1,4 @@
-import { Medal, ShoppingBag, Coffee, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { ShoppingBag, Coffee, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { Button } from 'antd';
 
 const Leaderboard = () => {
