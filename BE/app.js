@@ -28,10 +28,22 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 // app.use(express.static(path.join(__dirname, 'public')));
 
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    FRONTEND_URL,
+]
+
 // Connect to frontend
 app.use(cors({
-    origin: FRONTEND_URL || 'http://localhost:5173',
-    credentials: true
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('CORS profile does not allow this origin'));
+        }
+    },
+    credentials: true,
 }));
 
 app.use('/api/auth', authRouter);
