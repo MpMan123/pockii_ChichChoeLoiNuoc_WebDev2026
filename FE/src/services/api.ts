@@ -27,6 +27,7 @@ api.interceptors.response.use(
 
         if (error.response?.status === 401) {
             localStorage.removeItem('user');
+            console.error("NOT AUTHENTICATE");
             if (window.location.pathname !== '/login') {
                 window.location.href = '/login';
             }
