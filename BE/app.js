@@ -30,7 +30,9 @@ app.use(cookieParser());
 
 const allowedOrigins = [
     FRONTEND_URL,
+    'http://localhost:5173'
 ]
+console.log("ALLOWED ORIGINS", allowedOrigins);
 
 // Connect to frontend
 app.use(cors({
@@ -76,7 +78,7 @@ const startServer = async () => {
             console.log(`🚀 Server is running on port ${PORT}`);
             console.log(`🌐 API Documentation: http://localhost:${PORT}/api-docs`);
             console.log(`📝 Environment: ${NODE_ENV || 'development'}`);
-            console.log(`🔗 API Base URL: http://localhost:${PORT}/api`);
+            console.log(`🔗 API Base URL: ${FRONTEND_URL}`);
         })
     } catch (error) {
         console.error("❌❌❌ Cannot start server", error);
