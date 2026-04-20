@@ -23,10 +23,11 @@ export const login = async (req, res) => {
         }
 
         // Set HttpOnly cookie for the access token to prevent XSS
+        // Use sameSite='none' in production so cookies work across Vercel <> Render domains.
         res.cookie('access_token', data.session.access_token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
@@ -50,7 +51,7 @@ export const logout = async (req, res) => {
         res.clearCookie('access_token', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
         });
 
         return res.status(200).json({
