@@ -1,9 +1,27 @@
 import { Home, Zap, CreditCard, ChevronRight } from 'lucide-react';
-import { Button, Input, Select, DatePicker, InputNumber, Form } from 'antd';
+import { Button, Input, Select, DatePicker, InputNumber, Form, message } from 'antd';
 import { createDebt } from '../services/debt.service';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { fetchDebts } from '../services/debt.service';
+
+interface Debt {
+  debtname: string;
+  initialprincipal: number;
+  currentbalance: number;
+  flatinteresrate: number;
+  effectiveinterestrate: number;
+  currency: string;
+  priority: string;
+  enddate: Date;
+}
 
 const Debts = () => {
+  const { user } = useAuth();
   const [form] = Form.useForm();
+  const [debts, setDebts] = useState<Debt[]>([]);
+
+
   const handleCreateDebt = async () => {
     try {
       const values = await form.validateFields();
@@ -19,13 +37,35 @@ const Debts = () => {
         enddate: values.dueDate.format('YYYY-MM-DD'),
       }
 
-      await createDebt(payload);
+      const response = await createDebt(payload);
+      if (response.status) {
+        message.success("Tạo khoản nợ thành công!")
+      }
+      else {
+        message.error("Lỗi khi tạo khoản nợ!");
+      }
       form.resetFields();
     } catch (error) {
       console.error(error);
     }
 
   }
+
+
+  useEffect(() => {
+    const loadDebts = async () => {
+      try {
+        const response = await fetchDebts();
+        setDebts(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    if (user) {
+      loadDebts();
+    }
+  }, [user])
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -53,26 +93,22 @@ const Debts = () => {
             </div>
 
             <div className="flex flex-col gap-4">
-              {[
-                { name: "Mortgage Payment", info: "Due in 5 days • Chase Bank", amount: "$2,450.00", icon: <Home size={24} className="text-primary" />, bg: 'bg-primary/10', priority: 'High Priority', btn: 'primary' },
-                { name: "Utility Bill", info: "Due in 12 days • City Electric", amount: "$184.20", icon: <Zap size={24} className="text-warning" />, bg: 'bg-warning/10', priority: 'Standard', btn: 'default' },
-                { name: "Visa Gold Credit", info: "Due in 15 days • Minimum payment", amount: "$350.00", icon: <CreditCard size={24} className="text-danger" />, bg: 'bg-danger/10', priority: 'High Priority', btn: 'default' }
-              ].map((debt, i) => (
+              {debts.map((debt, i) => (
                 <div key={i} className="glass bg-white flex flex-col sm:flex-row items-start sm:items-center p-5 rounded-2xl gap-5 hover:-translate-y-0.5 hover:shadow-md transition-all">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${debt.bg}`}>
+                  {/* <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${debt.bg}`}>
                     {debt.icon}
-                  </div>
+                  </div> */}
                   <div className="flex-1">
-                    <h4 className="text-lg font-semibold text-text">{debt.name}</h4>
-                    <p className="text-sm text-text-muted mt-1">{debt.info}</p>
+                    <h4 className="text-lg font-semibold text-text">{debt.debtname}</h4>
+                    <p className="text-sm text-text-muted mt-1">{debt.initialprincipal}</p>
                   </div>
                   <div className="flex flex-col sm:items-end gap-1 shrink-0">
-                    <h4 className="text-lg font-bold text-text">{debt.amount}</h4>
+                    <h4 className="text-lg font-bold text-text">{debt.currentbalance} {debt.currency}</h4>
                     <span className={`badge ${debt.priority === 'High Priority' ? 'badge-warning' : ''}`}>{debt.priority}</span>
                   </div>
                   <Button
-                    type={debt.btn as "primary" | "default"}
-                    className={`mt-4 sm:mt-0 font-semibold w-full sm:w-auto h-10 px-6 rounded-xl ${debt.btn === 'primary' ? 'bg-primary hover:!bg-primary-dark border-none shadow-sm' : 'border-[#E2E8F0] hover:!border-primary hover:!text-primary'}`}
+                    type={debt.currency as "primary" | "default"}
+                    className={`mt-4 sm:mt-0 font-semibold w-full sm:w-auto h-10 px-6 rounded-xl ${debt.currency === 'primary' ? 'bg-primary hover:!bg-primary-dark border-none shadow-sm' : 'border-[#E2E8F0] hover:!border-primary hover:!text-primary'}`}
                   >
                     Pay Now
                   </Button>

@@ -9,7 +9,7 @@ export const createDebt = async (debt: any) => {
     }
 }
 
-export const getAllDebts = async () => {
+export const fetchDebts = async () => {
     try {
         const response = await api.get('/debt');
         return response.data;

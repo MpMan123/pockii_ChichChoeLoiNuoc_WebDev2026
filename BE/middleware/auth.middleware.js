@@ -21,6 +21,9 @@ export const verifyToken = async (req, res, next) => {
             });
         }
 
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log("Current User ID:", session?.user?.id);
+
         // 3. Gắn thông tin user lấy được vào req.user để các controller phía sau sử dụng được
         req.user = data.user;
 

@@ -89,7 +89,9 @@ const Dashboard = () => {
       loadPortfolio();
       loadBills();
     }
-  }, [user]); const columns: ColumnsType<Transaction> = [
+  }, [user]); 
+  
+  const columns: ColumnsType<Transaction> = [
     {
       title: 'TRANSACTION',
       dataIndex: 'title',
